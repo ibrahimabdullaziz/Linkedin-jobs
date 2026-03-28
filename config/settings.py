@@ -9,7 +9,7 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # LinkedIn Scraping Settings (Comma-separated)
-_keywords = os.getenv("LINKEDIN_KEYWORDS", "frontend, backend, fullstack, js, .net, node")
+_keywords = os.getenv("LINKEDIN_KEYWORDS", "frontend, backend, fullstack, node, react, developer, tester, ui, ux, ai")
 LINKEDIN_KEYWORDS = [k.strip() for k in _keywords.split(",") if k.strip()]
 
 _locations = os.getenv("LINKEDIN_LOCATIONS", "Egypt, United States, Canada, Saudi Arabia")
