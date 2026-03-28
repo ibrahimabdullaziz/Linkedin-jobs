@@ -31,12 +31,11 @@ class Job:
         location_esc = escape_md(self.location)
         date_esc = escape_md(self.posted_date)
         
-        # Build the message string
-        msg = f"📍 *New Job Match* 📍\n\n"
-        msg += f"💼 *Role:* {title_esc}\n"
-        msg += f"🏢 *Company:* {company_esc}\n"
-        msg += f"🌍 *Location:* {location_esc}\n"
-        msg += f"📅 *Posted:* {date_esc}\n\n"
-        msg += f"[Apply on LinkedIn]({self.job_url})"
+        # Build the new cleaner, bolder message string
+        msg = f"*{title_esc}*\n"
+        msg += f"🏢 {company_esc}\n"
+        msg += f"📍 {location_esc}\n"
+        msg += f"🕒 {date_esc}\n\n"
+        msg += f"[➡️ Apply Here]({self.job_url})"
         
         return msg
