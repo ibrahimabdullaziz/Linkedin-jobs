@@ -36,6 +36,6 @@ class Job:
         msg += f"🏢 {company_esc}\n"
         msg += f"📍 {location_esc}\n"
         msg += f"🕒 {date_esc}\n\n"
-        msg += f"[➡️ Apply Here]({self.job_url})"
+        msg += f"[📖 Read more about this job on LinkedIn »]({self.job_url})"
         
         return msg
