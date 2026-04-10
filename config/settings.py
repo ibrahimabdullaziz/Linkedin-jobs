@@ -12,7 +12,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 _keywords = os.getenv("LINKEDIN_KEYWORDS", "frontend, backend, fullstack, node, react, developer, tester, ui, ux, ai, .net, php, python, java, golang, go, c++, ruby, rust, angular, vue, django, spring, ios, android, flutter, react native, swift, kotlin, devops, machine learning, ml")
 LINKEDIN_KEYWORDS = [k.strip() for k in _keywords.split(",") if k.strip()]
 
-_locations = os.getenv("LINKEDIN_LOCATIONS", "Egypt, Saudi Arabia, Remote")
+_locations = os.getenv("LINKEDIN_LOCATIONS", "Egypt, Saudi Arabia")
 LINKEDIN_LOCATIONS = [loc.strip() for loc in _locations.split(",") if loc.strip()]
 
 # Application Settings
