@@ -8,6 +8,7 @@ import random
 
 from models.job import Job
 from filters.date_filter import is_from_today
+from config.settings import LINKEDIN_KEYWORDS
 
 # Standard browser headers to avoid basic blocks
 USER_AGENTS = [
@@ -48,6 +49,23 @@ async def fetch_jobs_page(client: httpx.AsyncClient, keywords: str, location: st
         logger.error(f"Request error scraping LinkedIn: {e}")
         return ""
 
+def is_title_relevant(title: str) -> bool:
+    title_lower = title.lower()
+    keywords_lower = [k.lower() for k in LINKEDIN_KEYWORDS]
+    
+    # Accept if the title contains ANY of our target keywords
+    for k in keywords_lower:
+        if k in title_lower:
+            return True
+            
+    # Also explicitly accept general software terms just to be safe
+    general_terms = ["engineer", "developer", "programmer", "software", "backend", "frontend", "full stack", "tech lead", "architect", "data", "qa", "tester"]
+    for t in general_terms:
+        if t in title_lower:
+            return True
+            
+    return False
+
 def parse_jobs(html: str) -> List[Job]:
     """Parses the HTML fragment returned by the Guest API."""
     jobs = []
@@ -71,6 +89,9 @@ def parse_jobs(html: str) -> List[Job]:
             # Title
             title_elem = card.find("h3", class_="base-search-card__title")
             title = title_elem.text.strip() if title_elem else "Unknown Title"
+
+            if not is_title_relevant(title):
+                continue
 
             # Company
             company_elem = card.find("h4", class_="base-search-card__subtitle")
