@@ -1,6 +1,6 @@
 <div align="center">
-  <h1> LinkedIn Job to Telegram Bot</h1>
-  <p>An automated, zero-dependency scraper that natively extracts LinkedIn job matches and delivers them straight to your Telegram channel.</p>
+  <h1>🚀 Multi-Board Job to Telegram Bot</h1>
+  <p>An automated, zero-dependency async scraper that extracts job matches from 8+ major job boards (including MENA & Remote platforms) and delivers them straight to your Telegram channel.</p>
   <p><strong>Join the Channel:</strong> <a href="https://t.me/software_jobs_linkedin">t.me/software_jobs_linkedin</a></p>
 </div>
 
@@ -8,32 +8,47 @@
 
 ## Overview
 
-No API keys. No Selenium. No heavy browser automation.
-This bot utilizes LinkedIn's lightweight Guest API to fetch the latest job postings, filter out duplicates using embedded SQLite, and forward beautiful Markdown messages straight to your chat 24/7.
+No heavy browser automation required. 
+This bot utilizes ultra-fast concurrent `httpx` requests to fetch the latest job postings from multiple job boards simultaneously. It filters out duplicates using embedded SQLite and forwards beautiful Markdown messages straight to your chat 24/7.
+
+### 🌐 Supported Job Boards
+
+1. **LinkedIn** (Guest API)
+2. **Wuzzuf** (Egypt Focus)
+3. **Bayt** (MENA: Egypt, KSA, UAE)
+4. **GulfTalent** (Gulf: KSA, UAE)
+5. **Adzuna** (UAE, KSA)
+6. **Remotive** (Remote Global)
+7. **Arbeitnow** (Remote Global)
+8. **Himalayas** (Remote Global)
 
 ### Key Features
 
-- **Stateless & Lightweight:** Uses standard HTTP GET requests (`httpx`) without requiring a LinkedIn account or login cookies.
-- **Smart Filtering:** Extracts only "Today's" or recent listings to keep your feed relevant.
-- **Multi-Location & Keyword Engine:** Can search an infinite combination of job titles (e.g. `frontend`, `node`, `react`) across multiple countries entirely automatically.
+- **Massive Concurrency:** Uses `asyncio.gather` to scrape multiple boards, keywords, and locations simultaneously.
+- **Smart Filtering & Limits:** Limits each board to the freshest jobs (e.g., max 10-20 per run) to keep your feed highly relevant.
 - **Deduplication:** Prevents spamming your channel with duplicate posts using a local SQLite persistence layer.
-- **Async Execution:** Highly performant non-blocking asynchronous event loops.
+- **Source Tracking:** Each Telegram message clearly indicates which board the job came from (e.g., `📌 via Wuzzuf`).
+- **Stateless & Lightweight:** Operates as an isolated background worker perfect for free-tier cloud hosting.
 
 ---
 
 ## Prerequisites & Configuration
 
-The bot is controlled entirely by Environment Variables. You simply provide it the keywords and your Telegram bot credentials.
+The bot is controlled entirely by Environment Variables. You simply provide it the keywords, locations, and your API credentials.
 
 ### Environment Variables Required
+
+Create a `.env` file in the root folder:
 
 | Variable                  | Description                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------ |
 | `TELEGRAM_BOT_TOKEN`      | Token provided by `@BotFather` on Telegram.                                    |
 | `TELEGRAM_CHAT_ID`        | Your chat or channel ID. **For channels, you must include the `-100` prefix!** |
 | `LINKEDIN_KEYWORDS`       | Comma-separated list of job titles (e.g., `frontend, fullstack, react`)        |
-| `LINKEDIN_LOCATIONS`      | Comma-separated list of locations (e.g., `Egypt, Remote, Canada`)              |
+| `LINKEDIN_LOCATIONS`      | Comma-separated list of locations (e.g., `Egypt, Saudi Arabia, United Arab Emirates`) |
 | `SCRAPE_INTERVAL_MINUTES` | Frequency of the scraping loop in minutes (e.g., `10`)                         |
+| `ADZUNA_APP_ID`           | (Optional) Free App ID from developer.adzuna.com                               |
+| `ADZUNA_APP_KEY`          | (Optional) Free App Key from developer.adzuna.com                              |
 
 ---
 
@@ -45,9 +60,9 @@ This project is built to live on free-tier cloud environments. It binds to no po
 
 1. Fork or clone this repository to your GitHub account.
 2. Sign in to [Railway](https://railway.app/).
-3. Click **New Project** → **Deploy from GitHub repo** and select `Linkedin-jobs`.
+3. Click **New Project** → **Deploy from GitHub repo** and select your repo.
 4. In the Railway project settings, go to the **Variables** tab.
-5. Paste your Telegram tokens, keywords, and locations as new variables.
+5. Paste your Telegram tokens, Adzuna credentials, keywords, and locations as new variables.
 6. Railway will automatically install packages and continuously run the bot.
 
 ---
@@ -70,16 +85,7 @@ If you want to run or test the bot locally on your PC:
    ```
 
 3. **Set Up Environments**
-   Create a file named `.env` in the root folder and add your configuration:
-
-   ```env
-   TELEGRAM_BOT_TOKEN="your_token_here"
-   TELEGRAM_CHAT_ID="-100..."
-   LINKEDIN_KEYWORDS="frontend, fullstack, react"
-   LINKEDIN_LOCATIONS="Egypt, Remote, United States"
-   SCRAPE_INTERVAL_MINUTES=10
-   LOG_LEVEL="INFO"
-   ```
+   Add your `.env` configuration as detailed above.
 
 4. **Launch the Bot**
    ```bash
