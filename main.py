@@ -1,5 +1,7 @@
 import asyncio
 import sys
+import os
+from aiohttp import web
 from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -85,13 +87,30 @@ async def main():
     
     scheduler.start()
     
+    # --- Web Server for UptimeRobot (Render Fix) ---
+    async def health_check(request):
+        return web.Response(text="Bot is running!")
+
+    app = web.Application()
+    app.router.add_get('/', health_check)
+    
+    runner = web.AppRunner(app)
+    await runner.setup()
+    
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logger.info(f"Web server started on port {port} for UptimeRobot pings.")
+    # -----------------------------------------------
+
     try:
-        # Keep the main thread alive for asyncio scheduler
+        # Keep the main thread alive for asyncio scheduler and web server
         while True:
             await asyncio.sleep(3600)
     except (KeyboardInterrupt, SystemExit):
         logger.info("Graceful shutdown initiated.")
         scheduler.shutdown()
+        await runner.cleanup()
         logger.info("Bot stopped.")
 
 if __name__ == "__main__":
