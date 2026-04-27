@@ -7,7 +7,6 @@ from config.settings import LOG_LEVEL, SCRAPE_INTERVAL_MINUTES, LINKEDIN_KEYWORD
 from database.repository import JobRepository
 from scraper.linkedin import scrape_linkedin_jobs
 from scraper.remotive import scrape_remotive_jobs
-from scraper.arbeitnow import scrape_arbeitnow_jobs
 from scraper.himalayas import scrape_himalayas_jobs
 from scraper.adzuna import scrape_adzuna_jobs
 from scraper.wuzzuf import scrape_wuzzuf_jobs
@@ -34,7 +33,6 @@ async def scrape_and_notify(repo: JobRepository, notifier: TelegramNotifier):
             # We add all our scraper calls to the tasks list
             tasks.append(scrape_linkedin_jobs(keyword=key, location=loc, max_pages=1))
             tasks.append(scrape_remotive_jobs(keyword=key, location=loc, max_results=10))
-            tasks.append(scrape_arbeitnow_jobs(keyword=key, location=loc, max_results=10))
             tasks.append(scrape_himalayas_jobs(keyword=key, location=loc, max_results=10))
             tasks.append(scrape_adzuna_jobs(keyword=key, location=loc, max_results=10))
             tasks.append(scrape_wuzzuf_jobs(keyword=key, location=loc, max_results=10))

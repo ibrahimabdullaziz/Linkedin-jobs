@@ -1,17 +1,16 @@
 <div align="center">
-  <h1>🚀 Multi-Board Job to Telegram Bot</h1>
+  <h1> Multi-Board Job to Telegram Bot</h1>
   <p>An automated, zero-dependency async scraper that extracts job matches from 8+ major job boards (including MENA & Remote platforms) and delivers them straight to your Telegram channel.</p>
-  <p><strong>Join the Channel:</strong> <a href="https://t.me/software_jobs_linkedin">t.me/software_jobs_linkedin</a></p>
 </div>
 
 <hr />
 
 ## Overview
 
-No heavy browser automation required. 
+No heavy browser automation required.
 This bot utilizes ultra-fast concurrent `httpx` requests to fetch the latest job postings from multiple job boards simultaneously. It filters out duplicates using embedded SQLite and forwards beautiful Markdown messages straight to your chat 24/7.
 
-### 🌐 Supported Job Boards
+### Supported Job Boards
 
 1. **LinkedIn** (Guest API)
 2. **Wuzzuf** (Egypt Focus)
@@ -19,8 +18,7 @@ This bot utilizes ultra-fast concurrent `httpx` requests to fetch the latest job
 4. **GulfTalent** (Gulf: KSA, UAE)
 5. **Adzuna** (UAE, KSA)
 6. **Remotive** (Remote Global)
-7. **Arbeitnow** (Remote Global)
-8. **Himalayas** (Remote Global)
+7. **Himalayas** (Remote Global)
 
 ### Key Features
 
@@ -40,15 +38,15 @@ The bot is controlled entirely by Environment Variables. You simply provide it t
 
 Create a `.env` file in the root folder:
 
-| Variable                  | Description                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| `TELEGRAM_BOT_TOKEN`      | Token provided by `@BotFather` on Telegram.                                    |
-| `TELEGRAM_CHAT_ID`        | Your chat or channel ID. **For channels, you must include the `-100` prefix!** |
-| `LINKEDIN_KEYWORDS`       | Comma-separated list of job titles (e.g., `frontend, fullstack, react`)        |
+| Variable                  | Description                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| `TELEGRAM_BOT_TOKEN`      | Token provided by `@BotFather` on Telegram.                                           |
+| `TELEGRAM_CHAT_ID`        | Your chat or channel ID. **For channels, you must include the `-100` prefix!**        |
+| `LINKEDIN_KEYWORDS`       | Comma-separated list of job titles (e.g., `frontend, fullstack, react`)               |
 | `LINKEDIN_LOCATIONS`      | Comma-separated list of locations (e.g., `Egypt, Saudi Arabia, United Arab Emirates`) |
-| `SCRAPE_INTERVAL_MINUTES` | Frequency of the scraping loop in minutes (e.g., `10`)                         |
-| `ADZUNA_APP_ID`           | (Optional) Free App ID from developer.adzuna.com                               |
-| `ADZUNA_APP_KEY`          | (Optional) Free App Key from developer.adzuna.com                              |
+| `SCRAPE_INTERVAL_MINUTES` | Frequency of the scraping loop in minutes (e.g., `10`)                                |
+| `ADZUNA_APP_ID`           | (Optional) Free App ID from developer.adzuna.com                                      |
+| `ADZUNA_APP_KEY`          | (Optional) Free App Key from developer.adzuna.com                                     |
 
 ---
 
