@@ -115,12 +115,13 @@ def parse_jobs(html: str) -> List[Job]:
             job_url = url_elem["href"].split("?")[0] if url_elem and "href" in url_elem.attrs else f"https://www.linkedin.com/jobs/view/{job_id}"
 
             job = Job(
-                job_id=job_id,
+                job_id=f"linkedin_{job_id}",
                 title=title,
                 company=company,
                 location=location,
                 job_url=job_url,
-                posted_date=posted_date
+                posted_date=posted_date,
+                source="LinkedIn"
             )
             jobs.append(job)
 

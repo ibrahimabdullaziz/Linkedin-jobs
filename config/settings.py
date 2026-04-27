@@ -25,3 +25,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 # Database Setting
 DB_PATH = "jobs.db"
+
+# Adzuna Credentials
+ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID", "")
+ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY", "")

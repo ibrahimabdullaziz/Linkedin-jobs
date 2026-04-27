@@ -6,6 +6,13 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config.settings import LOG_LEVEL, SCRAPE_INTERVAL_MINUTES, LINKEDIN_KEYWORDS, LINKEDIN_LOCATIONS
 from database.repository import JobRepository
 from scraper.linkedin import scrape_linkedin_jobs
+from scraper.remotive import scrape_remotive_jobs
+from scraper.arbeitnow import scrape_arbeitnow_jobs
+from scraper.himalayas import scrape_himalayas_jobs
+from scraper.adzuna import scrape_adzuna_jobs
+from scraper.wuzzuf import scrape_wuzzuf_jobs
+from scraper.bayt import scrape_bayt_jobs
+from scraper.gulftalent import scrape_gulftalent_jobs
 from telegram_bot.notifier import TelegramNotifier
 
 # Configure Loguru
@@ -18,13 +25,30 @@ async def scrape_and_notify(repo: JobRepository, notifier: TelegramNotifier):
     
     # 1. Scrape all combinations
     scraped_jobs = []
+    
+    # We will gather all tasks here
+    tasks = []
+    
     for loc in LINKEDIN_LOCATIONS:
         for key in LINKEDIN_KEYWORDS:
-            # Setting max_pages=1 to keep things quick since we have many combinations
-            jobs = await scrape_linkedin_jobs(keyword=key, location=loc, max_pages=1)
-            scraped_jobs.extend(jobs)
-            # Short sleep between different searches to avoid rate limits
-            await asyncio.sleep(2)
+            # We add all our scraper calls to the tasks list
+            tasks.append(scrape_linkedin_jobs(keyword=key, location=loc, max_pages=1))
+            tasks.append(scrape_remotive_jobs(keyword=key, location=loc, max_results=10))
+            tasks.append(scrape_arbeitnow_jobs(keyword=key, location=loc, max_results=10))
+            tasks.append(scrape_himalayas_jobs(keyword=key, location=loc, max_results=10))
+            tasks.append(scrape_adzuna_jobs(keyword=key, location=loc, max_results=10))
+            tasks.append(scrape_wuzzuf_jobs(keyword=key, location=loc, max_results=10))
+            tasks.append(scrape_bayt_jobs(keyword=key, location=loc, max_results=10))
+            tasks.append(scrape_gulftalent_jobs(keyword=key, location=loc, max_results=10))
+            
+    # Run them concurrently
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    for res in results:
+        if isinstance(res, list):
+            scraped_jobs.extend(res)
+        elif isinstance(res, Exception):
+            logger.error(f"A scraper failed with exception: {res}")
     
     if not scraped_jobs:
         logger.info("No jobs found this cycle across any combination.")

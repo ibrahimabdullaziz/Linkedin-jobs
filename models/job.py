@@ -9,6 +9,7 @@ class Job:
     location: str
     job_url: str
     posted_date: str
+    source: str = "LinkedIn"
 
     def to_telegram_markdown(self) -> str:
         """
@@ -35,7 +36,8 @@ class Job:
         msg = f"*{title_esc}*\n"
         msg += f"🏢 {company_esc}\n"
         msg += f"📍 {location_esc}\n"
-        msg += f"🕒 {date_esc}\n\n"
+        msg += f"🕒 {date_esc}\n"
+        msg += f"📌 via {escape_md(self.source)}\n\n"
         msg += f"[➡️ Apply Here]({self.job_url})"
         
         return msg

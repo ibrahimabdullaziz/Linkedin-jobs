@@ -28,6 +28,7 @@ class JobRepository:
                         location TEXT,
                         job_url TEXT NOT NULL,
                         posted_date TEXT,
+                        source TEXT DEFAULT 'LinkedIn',
                         scraped_at TEXT NOT NULL DEFAULT (datetime('now')),
                         sent_to_tg INTEGER NOT NULL DEFAULT 0
                     )
@@ -49,9 +50,9 @@ class JobRepository:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    INSERT INTO jobs (job_id, title, company, location, job_url, posted_date)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (job.job_id, job.title, job.company, job.location, job.job_url, job.posted_date))
+                    INSERT INTO jobs (job_id, title, company, location, job_url, posted_date, source)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (job.job_id, job.title, job.company, job.location, job.job_url, job.posted_date, getattr(job, 'source', 'LinkedIn')))
                 conn.commit()
                 return True
         except sqlite3.IntegrityError:
@@ -86,7 +87,8 @@ class JobRepository:
                         company=row['company'],
                         location=row['location'],
                         job_url=row['job_url'],
-                        posted_date=row['posted_date']
+                        posted_date=row['posted_date'],
+                        source=row['source'] if 'source' in row.keys() else 'LinkedIn'
                     )
                     jobs.append(job)
         except Exception as e:
