@@ -1,3 +1,12 @@
+---
+title: Linkedin Job Bot
+emoji: 💼
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 <div align="center">
   <h1> Multi-Board Job to Telegram Bot</h1>
   <p>An automated, zero-dependency async scraper that extracts job matches from 8+ major job boards (including MENA & Remote platforms) and delivers them straight to your Telegram channel.</p>

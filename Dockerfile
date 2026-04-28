@@ -11,6 +11,10 @@ COPY . .
 
 # Create a non-root user (Hugging Face Spaces requirement)
 RUN useradd -m -u 1000 user
+
+# Give the user ownership of the /app folder so it can create the SQLite database
+RUN chown -R user:user /app
+
 USER user
 
 # Hugging Face exposes port 7860 by default
