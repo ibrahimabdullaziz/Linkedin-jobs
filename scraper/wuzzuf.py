@@ -18,35 +18,54 @@ async def scrape_wuzzuf_jobs(keyword: str, location: str, max_results: int = 20)
     if not is_egypt_location(location):
         return all_jobs
         
-    logger.info(f"Scraping Wuzzuf for '{keyword}' in '{location}'")
+    logger.debug(f"Scraping Wuzzuf for '{keyword}' in '{location}'")
     
-    url = "https://wuzzuf.net/search/jobs/"
-    params = {
-        "q": keyword,
-        "a[]": "New",
-        "l[]": "Egypt"
-    }
+    # Use the search URL format that Wuzzuf currently supports
+    encoded_keyword = urllib.parse.quote_plus(keyword)
+    url = f"https://wuzzuf.net/search/jobs/?q={encoded_keyword}&a%5B%5D=New&filters%5Bcountry%5D%5B0%5D=Egypt"
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
     }
     
     try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, params=params, headers=headers, timeout=20.0)
-            if resp.status_code == 404:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            resp = await client.get(url, headers=headers, timeout=20.0)
+            if resp.status_code in (404, 403):
                 return all_jobs
             resp.raise_for_status()
             
             soup = BeautifulSoup(resp.text, "html.parser")
-            cards = soup.select("div[class*='css-'][data-search-result]")
+            
+            # Try multiple selector strategies — Wuzzuf changes their HTML frequently
+            cards = []
+            
+            # Strategy 1: Job search result cards with data attributes
+            cards = soup.select("div[data-search-result]")
+            
+            # Strategy 2: Common card container patterns
             if not cards:
-                cards = soup.select("div.css-1gatmva, article.css-1xaesre")
+                cards = soup.select("div.css-pkv5jg, div.css-1gatmva")
+            
+            # Strategy 3: Look for job links with /jobs/p/ pattern
+            if not cards:
+                cards = soup.select("div.css-1symr6o")
+            
+            # Strategy 4: Any div containing a job link
+            if not cards:
+                job_links = soup.select("a[href*='/jobs/p/']")
+                cards = [link.find_parent("div", class_=True) for link in job_links if link.find_parent("div", class_=True)]
             
             for card in cards[:max_results]:
-                title_el = card.select_one("h2 a, h3 a, a[class*='css-'][data-pk]")
+                if not card:
+                    continue
+                    
+                # Find title link
+                title_el = card.select_one("a[href*='/jobs/p/']")
                 if not title_el:
-                    title_el = card.select_one("a[href*='/jobs/p/']")
+                    title_el = card.select_one("h2 a")
                 if not title_el:
                     continue
                 
@@ -57,13 +76,24 @@ async def scrape_wuzzuf_jobs(keyword: str, location: str, max_results: int = 20)
                 # Extract ID from URL or title
                 job_id = f"wuzzuf_{href.split('-')[-1]}" if '-' in href else f"wuzzuf_{title}"
                 
-                company_el = card.select_one("a[class*='company'], span[class*='company'], div[class*='company']")
+                # Company — try multiple patterns
+                company_el = (
+                    card.select_one("a[class*='company']") or
+                    card.select_one("span[class*='company']") or
+                    card.select_one("div > a[href*='/jobs/companies/']")
+                )
                 company = company_el.get_text(strip=True).replace("-", "").strip() if company_el else "Unknown Company"
                 
-                loc_el = card.select_one("span[class*='location'], a[class*='location']")
+                # Location
+                loc_el = (
+                    card.select_one("span[class*='location']") or
+                    card.select_one("a[class*='location']") or
+                    card.select_one("span.css-5wys0k")
+                )
                 loc = loc_el.get_text(strip=True) if loc_el else "Egypt"
                 
-                date_el = card.select_one("span[class*='ago'], time, span[class*='date']")
+                # Date
+                date_el = card.select_one("time") or card.select_one("span[class*='ago']") or card.select_one("span[class*='date']")
                 posted_date = date_el.get("datetime", date_el.get_text(strip=True)) if date_el else ""
                 
                 job = Job(
@@ -79,5 +109,5 @@ async def scrape_wuzzuf_jobs(keyword: str, location: str, max_results: int = 20)
     except Exception as e:
         logger.error(f"Error scraping Wuzzuf: {e}")
         
-    logger.info(f"Wuzzuf found {len(all_jobs)} jobs.")
+    logger.debug(f"Wuzzuf found {len(all_jobs)} jobs for '{keyword}'.")
     return all_jobs

@@ -7,7 +7,7 @@ from models.job import Job
 async def scrape_himalayas_jobs(keyword: str, location: str, max_results: int = 20) -> List[Job]:
     """Scrape from Himalayas (remote jobs)."""
     all_jobs = []
-    logger.info(f"Scraping Himalayas for '{keyword}'")
+    logger.debug(f"Scraping Himalayas for '{keyword}'")
     
     encoded_keyword = urllib.parse.quote(keyword)
     url = f"https://himalayas.app/jobs/api?search={encoded_keyword}&limit={max_results}"
@@ -42,5 +42,5 @@ async def scrape_himalayas_jobs(keyword: str, location: str, max_results: int = 
     except Exception as e:
         logger.error(f"Error scraping Himalayas: {e}")
         
-    logger.info(f"Himalayas found {len(all_jobs)} jobs.")
+    logger.debug(f"Himalayas found {len(all_jobs)} jobs for '{keyword}'.")
     return all_jobs

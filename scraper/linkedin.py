@@ -137,7 +137,7 @@ async def scrape_linkedin_jobs(keyword: str, location: str, max_pages: int = 1) 
     Scrapes multiple pages until no more jobs are found or max_pages is reached.
     """
     all_jobs = []
-    logger.info(f"Scraping '{keyword}' in '{location}'")
+    logger.debug(f"Scraping LinkedIn for '{keyword}' in '{location}'")
     
     async with httpx.AsyncClient() as client:
         for page in range(max_pages):
@@ -160,5 +160,5 @@ async def scrape_linkedin_jobs(keyword: str, location: str, max_pages: int = 1) 
             if page < max_pages - 1:
                 await asyncio.sleep(random.uniform(2.0, 4.0))
 
-    logger.info(f"Scrape complete. Found {len(all_jobs)} today's jobs.")
+    logger.debug(f"LinkedIn found {len(all_jobs)} today's jobs for '{keyword}'.")
     return all_jobs

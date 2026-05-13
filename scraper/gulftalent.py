@@ -26,7 +26,7 @@ async def scrape_gulftalent_jobs(keyword: str, location: str, max_results: int =
     if not country_slug:
         return all_jobs
         
-    logger.info(f"Scraping GulfTalent for '{keyword}' in '{location}'")
+    logger.debug(f"Scraping GulfTalent for '{keyword}' in '{location}'")
     
     url = f"https://www.gulftalent.com/jobs/in-{country_slug}/all-industries/all-functions/1/"
     params = {"q": keyword}
@@ -80,5 +80,5 @@ async def scrape_gulftalent_jobs(keyword: str, location: str, max_results: int =
     except Exception as e:
         logger.error(f"Error scraping GulfTalent: {e}")
         
-    logger.info(f"GulfTalent found {len(all_jobs)} jobs.")
+    logger.debug(f"GulfTalent found {len(all_jobs)} jobs for '{keyword}'.")
     return all_jobs

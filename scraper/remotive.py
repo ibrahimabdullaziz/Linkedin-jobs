@@ -7,7 +7,7 @@ from models.job import Job
 async def scrape_remotive_jobs(keyword: str, location: str, max_results: int = 20) -> List[Job]:
     """Scrape from remotive (remote jobs). Ignoring location as it's remote first."""
     all_jobs = []
-    logger.info(f"Scraping Remotive for '{keyword}'")
+    logger.debug(f"Scraping Remotive for '{keyword}'")
     
     encoded_keyword = urllib.parse.quote(keyword)
     url = f"https://remotive.com/api/remote-jobs?search={encoded_keyword}&limit={max_results}"
@@ -40,5 +40,5 @@ async def scrape_remotive_jobs(keyword: str, location: str, max_results: int = 2
     except Exception as e:
         logger.error(f"Error scraping Remotive: {e}")
         
-    logger.info(f"Remotive found {len(all_jobs)} jobs.")
+    logger.debug(f"Remotive found {len(all_jobs)} jobs for '{keyword}'.")
     return all_jobs

@@ -26,7 +26,7 @@ async def scrape_bayt_jobs(keyword: str, location: str, max_results: int = 20) -
     if not country_code:
         return all_jobs
         
-    logger.info(f"Scraping Bayt for '{keyword}' in '{location}'")
+    logger.debug(f"Scraping Bayt for '{keyword}' in '{location}'")
     
     keywords_slug = urllib.parse.quote_plus(keyword)
     url = f"https://www.bayt.com/en/{country_code}/jobs/{keywords_slug}-jobs/"
@@ -83,5 +83,5 @@ async def scrape_bayt_jobs(keyword: str, location: str, max_results: int = 20) -
     except Exception as e:
         logger.error(f"Error scraping Bayt: {e}")
         
-    logger.info(f"Bayt found {len(all_jobs)} jobs.")
+    logger.debug(f"Bayt found {len(all_jobs)} jobs for '{keyword}'.")
     return all_jobs

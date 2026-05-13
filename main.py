@@ -10,7 +10,6 @@ from database.repository import JobRepository
 from scraper.linkedin import scrape_linkedin_jobs
 from scraper.remotive import scrape_remotive_jobs
 from scraper.himalayas import scrape_himalayas_jobs
-from scraper.adzuna import scrape_adzuna_jobs
 from scraper.wuzzuf import scrape_wuzzuf_jobs
 from scraper.bayt import scrape_bayt_jobs
 from scraper.gulftalent import scrape_gulftalent_jobs
@@ -20,38 +19,55 @@ from telegram_bot.notifier import TelegramNotifier
 logger.remove()
 logger.add(sys.stdout, level=LOG_LEVEL, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>")
 
+# Concurrency control — prevents slamming APIs and hitting Railway log limits
+MAX_CONCURRENT = 10
+
 async def scrape_and_notify(repo: JobRepository, notifier: TelegramNotifier):
     """Main pipeline execution for a single scrape cycle."""
-    logger.info("Starting scheduled scrape cycle for multiple keywords and locations...")
+    logger.info(f"Starting scrape cycle — {len(LINKEDIN_KEYWORDS)} keywords × {len(LINKEDIN_LOCATIONS)} locations")
     
-    # 1. Scrape all combinations
     scraped_jobs = []
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT)
     
-    # We will gather all tasks here
+    async def rate_limited(coro):
+        """Wrap a scraper coroutine with a semaphore for rate limiting."""
+        async with semaphore:
+            result = await coro
+            await asyncio.sleep(0.3)  # Small delay between completions
+            return result
+    
     tasks = []
     
+    # ── Location-AWARE scrapers (need to run per keyword × location) ──
     for loc in LINKEDIN_LOCATIONS:
         for key in LINKEDIN_KEYWORDS:
-            # We add all our scraper calls to the tasks list
-            tasks.append(scrape_linkedin_jobs(keyword=key, location=loc, max_pages=1))
-            tasks.append(scrape_remotive_jobs(keyword=key, location=loc, max_results=10))
-            tasks.append(scrape_himalayas_jobs(keyword=key, location=loc, max_results=10))
-            tasks.append(scrape_adzuna_jobs(keyword=key, location=loc, max_results=10))
-            tasks.append(scrape_wuzzuf_jobs(keyword=key, location=loc, max_results=10))
-            tasks.append(scrape_bayt_jobs(keyword=key, location=loc, max_results=10))
-            tasks.append(scrape_gulftalent_jobs(keyword=key, location=loc, max_results=10))
-            
-    # Run them concurrently
+            tasks.append(rate_limited(scrape_linkedin_jobs(keyword=key, location=loc, max_pages=1)))
+            tasks.append(rate_limited(scrape_wuzzuf_jobs(keyword=key, location=loc, max_results=10)))
+            tasks.append(rate_limited(scrape_bayt_jobs(keyword=key, location=loc, max_results=10)))
+            tasks.append(rate_limited(scrape_gulftalent_jobs(keyword=key, location=loc, max_results=10)))
+    
+    # ── Location-AGNOSTIC scrapers (only run once per keyword) ──
+    for key in LINKEDIN_KEYWORDS:
+        tasks.append(rate_limited(scrape_remotive_jobs(keyword=key, location="Remote", max_results=10)))
+        tasks.append(rate_limited(scrape_himalayas_jobs(keyword=key, location="Remote", max_results=10)))
+
+    logger.info(f"Dispatching {len(tasks)} scraper tasks (max {MAX_CONCURRENT} concurrent)...")
+    
+    # Run them concurrently (bounded by semaphore)
     results = await asyncio.gather(*tasks, return_exceptions=True)
     
+    error_count = 0
     for res in results:
         if isinstance(res, list):
             scraped_jobs.extend(res)
         elif isinstance(res, Exception):
+            error_count += 1
             logger.error(f"A scraper failed with exception: {res}")
     
+    logger.info(f"Scraping done. {len(scraped_jobs)} raw jobs collected, {error_count} errors.")
+    
     if not scraped_jobs:
-        logger.info("No jobs found this cycle across any combination.")
+        logger.info("No jobs found this cycle across any source.")
         return
 
     # 2. Store & Dedupe

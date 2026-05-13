@@ -9,7 +9,7 @@ pinned: false
 
 <div align="center">
   <h1> Multi-Board Job to Telegram Bot</h1>
-  <p>An automated, zero-dependency async scraper that extracts job matches from 8+ major job boards (including MENA & Remote platforms) and delivers them straight to your Telegram channel.</p>
+  <p>An automated, zero-dependency async scraper that extracts job matches from 6+ major job boards (including MENA & Remote platforms) and delivers them straight to your Telegram channel.</p>
 </div>
 
 <hr />
@@ -25,9 +25,8 @@ This bot utilizes ultra-fast concurrent `httpx` requests to fetch the latest job
 2. **Wuzzuf** (Egypt Focus)
 3. **Bayt** (MENA: Egypt, KSA, UAE)
 4. **GulfTalent** (Gulf: KSA, UAE)
-5. **Adzuna** (UAE, KSA)
-6. **Remotive** (Remote Global)
-7. **Himalayas** (Remote Global)
+5. **Remotive** (Remote Global)
+6. **Himalayas** (Remote Global)
 
 ### Key Features
 
@@ -54,8 +53,6 @@ Create a `.env` file in the root folder:
 | `LINKEDIN_KEYWORDS`       | Comma-separated list of job titles (e.g., `frontend, fullstack, react`)               |
 | `LINKEDIN_LOCATIONS`      | Comma-separated list of locations (e.g., `Egypt, Saudi Arabia, United Arab Emirates`) |
 | `SCRAPE_INTERVAL_MINUTES` | Frequency of the scraping loop in minutes (e.g., `10`)                                |
-| `ADZUNA_APP_ID`           | (Optional) Free App ID from developer.adzuna.com                                      |
-| `ADZUNA_APP_KEY`          | (Optional) Free App Key from developer.adzuna.com                                     |
 
 ---
 
@@ -69,7 +66,7 @@ This project is built to live on free-tier cloud environments. It binds to no po
 2. Sign in to [Railway](https://railway.app/).
 3. Click **New Project** → **Deploy from GitHub repo** and select your repo.
 4. In the Railway project settings, go to the **Variables** tab.
-5. Paste your Telegram tokens, Adzuna credentials, keywords, and locations as new variables.
+5. Paste your Telegram tokens, keywords, and locations as new variables.
 6. Railway will automatically install packages and continuously run the bot.
 
 ---
