@@ -27,8 +27,8 @@ def get_random_headers() -> dict:
         "Upgrade-Insecure-Requests": "1"
     }
 
-async def fetch_jobs_page(client: httpx.AsyncClient, keywords: str, location: str, start: int = 0) -> str:
-    """Hits the LinkedIn Guest Jobs API endpoint."""
+async def fetch_jobs_page(client: httpx.AsyncClient, keywords: str, location: str, start: int = 0, retries: int = 3) -> str:
+    """Hits the LinkedIn Guest Jobs API endpoint with retries on 429."""
     encoded_keywords = urllib.parse.quote(keywords)
     encoded_location = urllib.parse.quote(location)
     
@@ -38,16 +38,30 @@ async def fetch_jobs_page(client: httpx.AsyncClient, keywords: str, location: st
         f"keywords={encoded_keywords}&location={encoded_location}&f_TPR=r86400&start={start}"
     )
 
-    try:
-        response = await client.get(url, headers=get_random_headers(), timeout=15.0)
-        response.raise_for_status()
-        return response.text
-    except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error scraping LinkedIn (Status {e.response.status_code}): {e}")
-        return ""
-    except Exception as e:
-        logger.error(f"Request error scraping LinkedIn: {e}")
-        return ""
+    for attempt in range(retries):
+        try:
+            response = await client.get(url, headers=get_random_headers(), timeout=15.0)
+            if response.status_code == 429:
+                wait_time = random.uniform(2.0, 5.0) * (2 ** attempt)
+                logger.warning(f"Rate limited (429) by LinkedIn for '{keywords}'. Retrying in {wait_time:.1f}s...")
+                await asyncio.sleep(wait_time)
+                continue
+            response.raise_for_status()
+            return response.text
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429 and attempt < retries - 1:
+                wait_time = random.uniform(2.0, 5.0) * (2 ** attempt)
+                logger.warning(f"HTTP 429 scraping LinkedIn. Retrying in {wait_time:.1f}s...")
+                await asyncio.sleep(wait_time)
+                continue
+            logger.error(f"HTTP error scraping LinkedIn (Status {e.response.status_code}): {e}")
+            return ""
+        except Exception as e:
+            logger.error(f"Request error scraping LinkedIn: {e}")
+            return ""
+            
+    logger.error(f"Max retries reached for LinkedIn scraping '{keywords}' in '{location}'.")
+    return ""
 
 def is_title_relevant(title: str) -> bool:
     title_lower = title.lower()

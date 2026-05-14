@@ -65,9 +65,9 @@ async def scrape_and_notify(repo: JobRepository, notifier: TelegramNotifier):
             regional_tasks.append(scrape_wuzzuf_jobs(keyword=key, location=loc, max_results=10))
             regional_tasks.append(scrape_gulftalent_jobs(keyword=key, location=loc, max_results=10))
     
-    logger.info(f"Phase 2: Regional scrapers — {len(regional_tasks)} tasks (10 concurrent)...")
-    regional_sem = asyncio.Semaphore(10)
-    jobs = await run_scraper_batch(regional_tasks, regional_sem, delay=0.3)
+    logger.info(f"Phase 2: Regional scrapers — {len(regional_tasks)} tasks (4 concurrent, 1.5s delay)...")
+    regional_sem = asyncio.Semaphore(4)
+    jobs = await run_scraper_batch(regional_tasks, regional_sem, delay=1.5)
     all_jobs.extend(jobs)
     logger.info(f"Regional done — {len(jobs)} jobs collected.")
     
